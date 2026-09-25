@@ -1,0 +1,24 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}AFTERDARK — Indore's Nightlife Event{% endblock %}</title>
+<meta name="description" content="AFTERDARK — Indore's premium 18+ nightlife event. Book your entry now.">
+<link rel="stylesheet" href="{% static 'party/css/style.css' %}">
+</head>
+<body>
+{% block content %}{% endblock %}
+
+<footer>
+  <div class="foot-title">AFTERDARK</div>
+  <p>{{ config.venue_name }} &middot; {{ config.address }}</p>
+  {% if config.contact_phone %}<p>📞 {{ config.contact_phone }}{% if config.contact_email %} &nbsp;|&nbsp; ✉ {{ config.contact_email }}{% endif %}</p>{% endif %}
+  <p style="max-width:640px;margin:14px auto 0;font-size:12px;opacity:.8;">{{ config.terms_and_conditions }}</p>
+  <p style="margin-top:14px;opacity:.6;">&copy; {% now "Y" %} AFTERDARK, Indore. All rights reserved.</p>
+</footer>
+
+<script src="{% static 'party/js/main.js' %}"></script>
+</body>
+</html>

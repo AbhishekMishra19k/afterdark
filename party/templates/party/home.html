@@ -1,0 +1,142 @@
+{% extends "party/base.html" %}
+{% load static %}
+{% block content %}
+
+<header class="site-header">
+  <div class="header-inner">
+    <div class="brand">
+      <div class="logo">AFTERDARK</div>
+      <div class="tagline">Indore's Night Belongs To Us</div>
+    </div>
+    <div class="countdown">
+      <div class="box"><span class="num" id="cd-days">--</span><span class="label">Days</span></div>
+      <div class="box"><span class="num" id="cd-hours">--</span><span class="label">Hrs</span></div>
+      <div class="box"><span class="num" id="cd-minutes">--</span><span class="label">Min</span></div>
+      <div class="box"><span class="num" id="cd-seconds">--</span><span class="label">Sec</span></div>
+    </div>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>AFTERDARK</h1>
+  <p class="sub">Indore &middot; Premium Nightlife Experience</p>
+  <div class="age-notice">
+    <strong>18+ ONLY.</strong> Valid original government photo ID proof (Aadhaar / PAN / Driving Licence / Passport) is mandatory for entry. No ID, no entry — no exceptions.
+  </div>
+</section>
+
+<div class="container">
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="book">Booking</button>
+    <button class="tab-btn" data-tab="reviews">Reviews</button>
+    <button class="tab-btn" data-tab="upcoming">Upcoming Event</button>
+    <button class="tab-btn" data-tab="contact">Contact Us</button>
+  </div>
+
+  <!-- BOOKING -->
+  <div class="tab-panel active" id="book">
+    <div class="card">
+      <div class="pricing-grid">
+        <div class="price-card">
+          <div class="type">Single Entry</div>
+          <div class="amount">₹{{ config.single_price }}</div>
+        </div>
+        <div class="price-card">
+          <div class="type">Couple Entry</div>
+          <div class="amount">₹{{ config.couple_price }}</div>
+        </div>
+      </div>
+      <p class="no-group">Group bookings are not accepted. Only Single or Couple entries.</p>
+
+      {% if messages %}
+      <ul class="messages">
+        {% for m in messages %}<li class="{{ m.tags }}">{{ m }}</li>{% endfor %}
+      </ul>
+      {% endif %}
+
+      <form method="post" action="{% url 'create_booking' %}">
+        {% csrf_token %}
+        {% for field in booking_form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}{% if field.field.required %} *{% endif %}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+        {% endfor %}
+        <script type="application/json" id="price-data">{"single": {{ config.single_price }}, "couple": {{ config.couple_price }}}</script>
+        <p>Amount payable: <strong id="selected-price">₹{{ config.single_price }}</strong></p>
+        <button type="submit" class="btn">Proceed to Payment</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- REVIEWS -->
+  <div class="tab-panel" id="reviews">
+    <div class="card">
+      <h2 class="section-title">Past Party — Reviews</h2>
+      {% if photos %}
+      <div class="gallery-grid" style="margin-bottom:24px;">
+        {% for p in photos %}
+        <img src="{{ p.image.url }}" alt="{{ p.caption }}" loading="lazy">
+        {% endfor %}
+      </div>
+      {% endif %}
+      {% for r in reviews %}
+      <div class="review">
+        <div class="stars">{% for i in "12345" %}{% if forloop.counter <= r.rating %}★{% else %}☆{% endif %}{% endfor %}</div>
+        <p>{{ r.review_text }}</p>
+        <div class="meta">— {{ r.guest_name }}{% if r.event_name %} &middot; {{ r.event_name }}{% endif %}</div>
+      </div>
+      {% empty %}
+      <p>No reviews yet — be the first to party with us.</p>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- UPCOMING -->
+  <div class="tab-panel" id="upcoming">
+    <div class="card">
+      <h2 class="section-title">Upcoming Event</h2>
+      {% if upcoming_event %}
+      <div class="event-hero">
+        {% if upcoming_event.image %}<img src="{{ upcoming_event.image.url }}" alt="{{ upcoming_event.title }}">{% endif %}
+        <div>
+          <h3 style="color:var(--gold);margin-top:0;">{{ upcoming_event.title }}</h3>
+          <p>{{ upcoming_event.description }}</p>
+          <p><strong>Date:</strong> {{ upcoming_event.event_date|date:"d M Y, g:i A" }}</p>
+          {% if upcoming_event.venue %}<p><strong>Venue:</strong> {{ upcoming_event.venue }}</p>{% endif %}
+        </div>
+      </div>
+      {% else %}
+      <p>No upcoming event announced yet — stay tuned.</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="tab-panel" id="contact">
+    <div class="card">
+      <h2 class="section-title">Contact Us</h2>
+      <p>{{ config.venue_name }} &middot; {{ config.address }}</p>
+      {% if config.contact_phone %}<p>📞 {{ config.contact_phone }}</p>{% endif %}
+      {% if config.contact_email %}<p>✉ {{ config.contact_email }}</p>{% endif %}
+      {% if config.instagram_url %}<p><a href="{{ config.instagram_url }}" target="_blank">Instagram →</a></p>{% endif %}
+      <form method="post" action="{% url 'contact' %}" style="margin-top:20px;">
+        {% csrf_token %}
+        {% for field in contact_form %}
+        <div class="field">
+          <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+          {{ field }}
+          {{ field.errors }}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn">Send Message</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+<script>startCountdown("{{ config.event_datetime|date:'c' }}");</script>
+{% endblock %}
